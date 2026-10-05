@@ -924,12 +924,13 @@ def shop():
                     print(f"{item} - {stats['Price']} gold - {stats.get('Damage', 'N/A')} damage - {stats['Quantity']} left")
                 elif 'Damage' not in stats and stats["Quantity"] > 0:
                     print(f"{item} - {stats['Price']} gold - {stats['Quantity']} left")
-            bought_something = False
+        print("")
+        bought_something = False
         
         print("(Type leave to leave)")
         shopping_selection = input("What would you like to buy? ").capitalize()
         if shopping_selection == 'Leave':
-            shopping = False
+            return
         elif shopping_selection not in shop_inventory:
             print("Not a valid item!")
             valid_item = False
@@ -950,6 +951,9 @@ def shop():
                 player_inventory[shopping_selection] = player_inventory.get(shopping_selection, 0) + amount_buying
                 shop_inventory[shopping_selection]['Quantity'] -= amount_buying
                 player_data['Gold'] -= (shop_inventory[shopping_selection]['Price'] * amount_buying)
+                print(f"You buy {amount_buying} {shopping_selection}.")
+                print(f"You have {player_data['Gold']} gold left.")
+                bought_something = True
             else:
                 print("You can't afford this!")
         elif valid_item:
@@ -970,10 +974,10 @@ def shop():
         if bought_something == True:
             if input("Would you like to buy more? (Yes/No) ").capitalize() == 'No':
                 shopping = False
+            else:
+                print("")
 
     print("There's nothing else to do here but leave.")
-
-
 
 
 #creates dungeon_1 map
@@ -1192,5 +1196,55 @@ while direction_chosen:
 
     if action == 3:
         shop()
-        print("You have completed all that exists for now! Thank you for playtesting!")
         direction_chosen = False
+
+print("You leave the shop and descend the staircase.")
+print(f"Congratulations {name}! You have finished the first layer of the Great Coil.")
+descending_action = input("What would you like to do? (Continue/Inventory) ").capitalize()
+if descending_action == 'Inventory':
+    acessing_inventory = True
+while acessing_inventory:
+    print("This is your inventory.")
+    #chatGPT made this
+    for item, value in player_inventory.items():
+        print(f"{item}: {value}")
+    inventory_action = input(f"What would you like to do? (Melee/Ranged/Leave) ").capitalize()
+    if inventory_action == 'Melee':
+        current_melee.clear()
+        for item in player_inventory:
+            if item in melee_items:
+                current_melee.append(item)
+                print(item)
+        melee_change = input("What melee item would you like to equip? ").capitalize()
+        if melee_change in current_melee:
+            melee = melee_change
+            print(f"{melee} equipped!")
+            input()
+        else:
+            print("Not a valid item!")
+    elif inventory_action == 'Ranged':
+        current_ranged.clear()
+        for item in player_inventory:
+            if item in ranged_items:
+                current_ranged.append(item)
+                print(item)
+        ranged_change = input("What ranged item would you like to equip? ").capitalize()
+        if ranged_change in current_ranged:
+            ranged = ranged_change
+            print(f"{ranged} equipped!")
+            input()
+        else:
+            print("Not a valid item!")
+    elif inventory_action == 'Leave':
+        acessing_inventory = False
+    else:
+        print("Not a valid option!")
+
+
+print("You continue through the staircase and walk into a new room...")
+
+action = 99
+direction_chosen = True
+while direction_chosen:
+    print("Not done yet")
+    direction_chosen = False
