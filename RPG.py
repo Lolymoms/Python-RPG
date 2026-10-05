@@ -46,7 +46,7 @@ shop_inventory = {
         'Price' : 5,
         'Damage' : 3,
         'Type' : 'Melee',
-        'Quantity' : 3
+        'Quantity' : 1
     },
 
     'Mace' : {
@@ -65,17 +65,20 @@ shop_inventory = {
 
     'Arrows' : {
         'Price' : 1,
-        'Quantity' : 20
+        'Quantity' : 20,
+        'Type' : 'Consumable'
     },
 
     'Special attack potion' : {
         'Price' : 10,
-        'Quantity' : 1
+        'Quantity' : 1,
+        'Type' : 'Consumable'
     },
 
     'Strength potion' : {
         'Price' : 10,
-        'Quantity' : 2
+        'Quantity' : 2,
+        'Type' : 'Consumable'
     }
 }
 
@@ -879,7 +882,7 @@ def shop():
         print("As soon as he sees you, his eyes light up.")
         print("'Hello adventurer!' he beams, 'You're the first person I've seen in weeks!'")
         print("'Well, since you're here, let me give you something!'")
-        selection = input("What would you like? (Melee/Ranged/Armor) ").capitalize
+        selection = input("What would you like? (Melee/Ranged/Armor) ").capitalize()
 
         if selection == 'Ranged':
             player_inventory['Crossbow'] = 9
@@ -908,16 +911,47 @@ def shop():
         print("If you want, I have some things to sell you.")
     shopping = input("Do you want to open the shop? (Yes/No) ").capitalize()
 
+    if shopping == 'Yes':
+        shopping = True
+        bought_something = True
+
     while shopping:
-        print()
         #chatGPT made this
-        for stat, value in shop_inventory.items():
-            print(f"{stat}: {value}")
-        input()
-        shopping_selection = input("What would you like to buy?").capitalize()
-        if shopping_selection in shop_inventory:
-            if player_data["Gold"] >= shop_inventory[shopping_selection]:
-                player_inventory[shopping_selection] = shop_inventory[shopping_selection]
+        if bought_something == True:
+            for item, stats in shop_inventory.items():
+                if 'Damage' in stats and stats["Quantity"] > 0:
+                    print(f"{item} - {stats['Price']} gold - {stats.get('Damage', 'N/A')} damage - {stats['Quantity']} left")
+                elif 'Damage' not in stats:
+                    print(f"{item} - {stats['Price']} gold - {stats['Quantity']} left")
+            bought_something = False
+        
+        print("(Type leave to leave)")
+        shopping_selection = input("What would you like to buy? ").capitalize()
+        if shopping_selection == 'Leave':
+            shopping = False
+        elif shopping_selection not in shop_inventory:
+            print("Not a valid item!")
+        elif shopping_selection in shop_inventory and shop_inventory[shopping_selection]['Quantity'] > 0:
+            if player_data["Gold"] >= shop_inventory[shopping_selection]['Price']:
+                if shop_inventory[shopping_selection]['Type'] == 'Melee' or shop_inventory[shopping_selection]['Type'] == 'Ranged':
+                    player_inventory[shopping_selection] = shop_inventory[shopping_selection]['Damage']
+                else:
+                    player_inventory[shopping_selection] = shop_inventory[shopping_selection]['Quantity']
+                shop_inventory[shopping_selection]['Quantity'] -= 1
+                player_data['Gold'] -= shop_inventory[shopping_selection]['Price']
+                print(f"You buy a {shopping_selection}.")
+                print(f"You have {player_data['Gold']} gold left.")
+                bought_something = True
+            else:
+                print("You don't have enough gold to buy this!")
+        elif shop_inventory[shopping_selection]['Quantity'] <= 0:
+            print(f"There are no {shopping_selection} left!")
+
+        if bought_something == True:
+            if input("Would you like to buy more? (Yes/No) ").capitalize() == 'No':
+                shopping = False
+
+    print("There's nothing else to do here but leave.")
 
 
 
@@ -946,6 +980,7 @@ if name == 'dev':
     print("Welcome to the dev panel! Choose your coordinates please")
     row = int(input("Input row (up and down) "))
     column = int(input("Input column (left and right) "))
+    player_data["Gold"] = int(input("Input gold "))
 else:
     tutorial = input(f"Welcome {name}! Would you like a tutorial? (Yes/No) ").capitalize()
     if tutorial == 'Yes':
