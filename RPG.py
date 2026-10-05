@@ -907,7 +907,7 @@ def shop():
             print("Hint: Use inventory to equip the longsword!")
             input()
 
-        print("Well I wish I could give you more, but I have a buisness to run!")
+        print("Well I wish I could give you more, but I have a business to run!")
         print("If you want, I have some things to sell you.")
     shopping = input("Do you want to open the shop? (Yes/No) ").capitalize()
 
@@ -936,7 +936,8 @@ def shop():
                 if shop_inventory[shopping_selection]['Type'] == 'Melee' or shop_inventory[shopping_selection]['Type'] == 'Ranged':
                     player_inventory[shopping_selection] = shop_inventory[shopping_selection]['Damage']
                 else:
-                    player_inventory[shopping_selection] = shop_inventory[shopping_selection]['Quantity']
+                    #chat GPT made the .get part
+                    player_inventory[shopping_selection] = player_inventory.get(shopping_selection, 0) + 1
                 shop_inventory[shopping_selection]['Quantity'] -= 1
                 player_data['Gold'] -= shop_inventory[shopping_selection]['Price']
                 print(f"You buy a {shopping_selection}.")
@@ -1008,7 +1009,7 @@ else:
         input()
         print("Finally, you might find enemies in your path. Fear not, as you can beat almost any enemy you find!")
         print("However, if you find yourself low on health or fear that the enemies are too strong for you, you can always try to run.")
-        print("You cannot run from bosses though, so if you feel unseasy about something, make sure you're ready!")
+        print("You cannot run from bosses though, so if you feel uneasy about something, make sure you're ready!")
         input()
         print("You also start with a special attack! Your special attack can change with training.")
         print("Your special attack will always hit and deal extra damage to your enemy!")
@@ -1024,7 +1025,7 @@ else:
         input()
     print("In the Kingdom of Ravenport the dungeons of The Great Coil are infamous for consuming adventurers in their depths never to be seen again.")
     print(f"But nevertheless, you, {name}, decide to brave the depths and slay the python at its core.") 
-    print("You leave your hometown with nothing but an old peice of armor you found and a rusty sword. Let's see if you made the right decision...")
+    print("You leave your hometown with nothing but an old piece of armor you found and a rusty sword. Let's see if you made the right decision...")
     input("")
     print("You enter the dungeon and find yourself in a dark room no larger than 2 meters long on either side. You barely fit.")
 
@@ -1080,7 +1081,7 @@ while direction_chosen:
             melee_change = input("What melee item would you like to equip? ").capitalize()
             if melee_change in current_melee:
                 melee = melee_change
-                print(f"{melee} equiped!")
+                print(f"{melee} equipped!")
                 input()
             else:
                 print("Not a valid item!")
@@ -1093,7 +1094,7 @@ while direction_chosen:
             ranged_change = input("What ranged item would you like to equip? ").capitalize()
             if ranged_change in current_ranged:
                 ranged = ranged_change
-                print(f"{ranged} equiped!")
+                print(f"{ranged} equipped!")
                 input()
             else:
                 print("Not a valid item!")
