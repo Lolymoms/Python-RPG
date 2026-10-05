@@ -916,12 +916,13 @@ def shop():
         bought_something = True
 
     while shopping:
+        buying_more_than_one_thing = False
         #chatGPT made this
         if bought_something == True:
             for item, stats in shop_inventory.items():
                 if 'Damage' in stats and stats["Quantity"] > 0:
                     print(f"{item} - {stats['Price']} gold - {stats.get('Damage', 'N/A')} damage - {stats['Quantity']} left")
-                elif 'Damage' not in stats:
+                elif 'Damage' not in stats and stats["Quantity"] > 0:
                     print(f"{item} - {stats['Price']} gold - {stats['Quantity']} left")
             bought_something = False
         
@@ -931,7 +932,27 @@ def shop():
             shopping = False
         elif shopping_selection not in shop_inventory:
             print("Not a valid item!")
-        elif shopping_selection in shop_inventory and shop_inventory[shopping_selection]['Quantity'] > 0:
+            valid_item = False
+        elif shop_inventory[shopping_selection]['Quantity'] <= 0:
+            print(f"There are no {shopping_selection} left!")
+            valid_item = False
+        else:
+            valid_item = True
+
+        if valid_item and shop_inventory[shopping_selection]['Quantity'] > 1:
+            one_time_list = range(1, shop_inventory[shopping_selection]['Quantity']+1)
+            amount_buying = number("How many would you like to buy? ", one_time_list)
+            if amount_buying > 1:
+                buying_more_than_one_thing = True
+
+        if buying_more_than_one_thing and valid_item:
+            if player_data["Gold"] >= (shop_inventory[shopping_selection]['Price'] * amount_buying):
+                player_inventory[shopping_selection] = player_inventory.get(shopping_selection, 0) + amount_buying
+                shop_inventory[shopping_selection]['Quantity'] -= amount_buying
+                player_data['Gold'] -= (shop_inventory[shopping_selection]['Price'] * amount_buying)
+            else:
+                print("You can't afford this!")
+        elif valid_item:
             if player_data["Gold"] >= shop_inventory[shopping_selection]['Price']:
                 if shop_inventory[shopping_selection]['Type'] == 'Melee' or shop_inventory[shopping_selection]['Type'] == 'Ranged':
                     player_inventory[shopping_selection] = shop_inventory[shopping_selection]['Damage']
@@ -944,9 +965,7 @@ def shop():
                 print(f"You have {player_data['Gold']} gold left.")
                 bought_something = True
             else:
-                print("You don't have enough gold to buy this!")
-        elif shop_inventory[shopping_selection]['Quantity'] <= 0:
-            print(f"There are no {shopping_selection} left!")
+                print("You can't afford this!")
 
         if bought_something == True:
             if input("Would you like to buy more? (Yes/No) ").capitalize() == 'No':
