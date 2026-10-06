@@ -35,13 +35,15 @@ level_up_experience = 100
 ranged = 'Bow'
 melee = 'Sword'
 #creates lists with all ranged and melee items
-melee_items = ['Sword', 'Longsword', 'Dagger', 'Mace', 'Scimitaur', 'Legendary Sword']
+melee_items = ['Sword', 'Longsword', 'Dagger', 'Mace', 'Scimitar', 'Legendary Sword']
 ranged_items = ['Bow', 'Longbow', 'Crossbow', 'Throwing Star', 'Blowgun']
 #creates list with all current items
 current_melee = []
 current_ranged = []
 #creates a variable that tracks the player's current dungeon level
 dungeon_level = 1
+#creates a variable used much later
+fighting_patrolling_goblins = False
 
 shop_inventory = {
     'Dagger' : {
@@ -415,6 +417,8 @@ def monster_action_determiner(health, max_health, cl_enc, boss, special_attack, 
 #there are 3 attack types, ranged, melee, and special, and they all have different stats
 #if there's more than one enemy, the logic changes and it allows the player to fight more than one enemy at once
 def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength, armor_enc, cl_enc, special_attack='None', flying=False, boss=False, amount=1):
+    global fighting_patrolling_goblins
+    global moving_enemy_alive_2
     returning = 0
     many_enemies = False
     fighting = True
@@ -479,11 +483,13 @@ def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength
                 print("You manage to escape!")
                 fighting = False
                 returning = 1
+                fighting_patrolling_goblins = False
             #easier to run if you are underleveled
             elif randomnum+2 > strength:
                 print("You manage to escape! Lucky for you.")
                 fighting = False
                 returning = 1
+                fighting_patrolling_goblins = False
             else:
                 print(f"You don't manage to escape! You have to fight the {name_enc} after all...")
                 input("")
@@ -690,6 +696,8 @@ def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength
             print(f"You also gain {experience} experience!")
             player_data["Experience"] += experience
             print(f"You have {player_data['Experience']} experience.")
+            if fighting_patrolling_goblins == True:
+                moving_enemy_alive_2 = False
             input()
 
         if player_data['Health'] <= 0:
@@ -754,6 +762,7 @@ def miniboss():
         print("You feel ready. You enter the room.")
         return encounter(**cube_miniboss)
     else:
+        dungeon_1_visited[row][column] = False
         print("You don't want to enter the room. You'll come back another time.")
         return
 
@@ -1007,10 +1016,17 @@ def shop():
         print("If you want, I have some things to sell you.")
     shopping = input("Do you want to open the shop? (Yes/No) ").capitalize()
 
-    if shopping == 'Yes':
-        shopping = True
-        bought_something = True
+    if shopping == 'No':
+        print("There's nothing else to do here but leave.")
+        return
 
+    for item, stats in shop_inventory.items():
+        if 'Damage' in stats and stats["Quantity"] > 0:
+            print(f"{item} - {stats['Price']} gold - {stats.get('Damage', 'N/A')} damage - {stats['Quantity']} left")
+        elif 'Damage' not in stats and stats["Quantity"] > 0:
+            print(f"{item} - {stats['Price']} gold - {stats['Quantity']} left")
+
+    
     while shopping:
         buying_more_than_one_thing = False
         #chatGPT made this
@@ -1076,6 +1092,7 @@ def shop():
     print("There's nothing else to do here but leave.")
 
 def level_up():
+    global level_up_experience
     player_data["Level"] += 1
     player_data["Experience"] -= level_up_experience
     player_data["Max Health"] += (5 + (2 * player_data["Level"]))
@@ -1346,6 +1363,8 @@ while acessing_inventory:
 
 print("You continue through the staircase and walk into a new room...")
 dungeon_level = 2
+row = 1
+column = 0
 
 ##creates a bunch of rooms used on layer 2
 
@@ -1382,7 +1401,7 @@ def lore_room():
     if dungeon_level == 2:
         if row == 0 and column == 1:
             print("You walk into the room and see something written on the walls.")
-            print("It says 'GET OUT. TRUST NOBODY")
+            print("It says 'GET OUT. TRUST NOBODY'")
             print("It has a date. Almost 200 years ago.")
             input()
             print("You decide to leave.")
@@ -1401,12 +1420,21 @@ def lore_room():
             else:
                 print("You're too creeped out to take the journal. You decide to leave it.")
 
+def moving_enemy():
+    if row == moving_enemy_row and moving_enemy_alive_2 == True:
+        print("You encounter a group of patrolling goblins!")
+        encounter(**goblins, amount=random.randint(3,6))
+    else:
+        print("You don't see anything, but you recognize this as an enemy patrol route.")
+        print("You decide to leave before you encounter them.")
+        input()
+
 
 dungeon_2 = [
-    [vault_room,lore_room,'Moving enemy','###','Shop',],
-    ['Entrance',gold_room,'Moving enemy','###','Miniboss',],
-    ['Shorcut',empty_room,'Moving enemy','Trap','Shortcut',],
-    ['###','###',gold_room,rest_room,key_room,],
+    [vault_room,lore_room, moving_enemy,'###','Shop',],
+    ['Entrance',gold_room, moving_enemy,'###','Miniboss',],
+    ['Shorcut',empty_room, moving_enemy,'Trap','Shortcut',],
+    ['###','###',gold_room, rest_room, key_room,],
     ['Staircase','Boss','Boss entrance',lore_room,'Blacksmith',]
 ]
 
@@ -1417,14 +1445,16 @@ dungeon_2_visited = [
     [False, False, False, False, False],
     [False, False, False, False, False]
 ]
-
+moving_enemy_row = 0
+moving_enemy_direction = 'Down'
+moving_enemy_alive_2 = True
 action = 99
 direction_chosen = True
 while direction_chosen:
 
     possible_directions = find_directions()
 
-    if name == 'dev':
+    if name == 'dev' and input("Open dev panel? ") == 'Yes':
         print("Dev panel again!")
         print(f"You are currently in row {row} and column {column}")
         print(f"possible directions returned {possible_directions}")
@@ -1492,6 +1522,13 @@ while direction_chosen:
             column += 1
         elif direction == 4:
             row += 1
+
+        if column == 2 and row == moving_enemy_row and moving_enemy_alive_2 == True:
+            print("You walked into a group of patrolling goblins!")
+            input()
+            fighting_patrolling_goblins = True
+            encounter(**goblins, amount=random.randint(3,6))
+
     elif movement == 'Map':
         map()
     elif movement == 'Run':
@@ -1513,9 +1550,33 @@ while direction_chosen:
         action = dungeon_2[row][column]()
     #if the player has been to a room, don't trigger anything
     elif dungeon_2_visited[row][column] == True:
-        if movement == 'Move':
+        #allows the player to be attacked by moving enemies even if they've already been there
+        if column == 2 and row <= 2 and movement == 'Move':
+            action = dungeon_2[row][column]()
+        elif movement == 'Move':
             print("You've been here before! There's nothing more to do.")
             print("")
 
     if player_data["Experience"] >= level_up_experience:
         level_up()
+
+    #creates logic for moving enemy row, used in moving_enemy
+    #if moving up and not at 3, move up
+    if moving_enemy_row < 2 and moving_enemy_direction == 'Up':
+        moving_enemy_row += 1
+    #if at 3, start moving down
+    elif moving_enemy_row == 2:
+        moving_enemy_direction = 'Down'
+        moving_enemy_row -= 1
+    #if at 0, start moving up
+    elif moving_enemy_row == 0:
+        moving_enemy_direction = 'Up'
+        moving_enemy_row += 1
+    #if moving down and not at 0, move down
+    else:
+        moving_enemy_row -= 1
+
+    if row == moving_enemy_row and column == 2 and moving_enemy_alive_2 == True:
+        print("Patroling goblins found you!")
+        input()
+        encounter(**goblins, amount=random.randint(3,6))
