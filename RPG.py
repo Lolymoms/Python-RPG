@@ -16,7 +16,7 @@ randomnum = 0
 #creates damage variable for damage
 damage = 0
 #creates direction_chosen variable, which will turn False when a valid direction is chosen
-direction_chosen = True
+direction_chosen = False
 #creates dead, which will turn true when a monster dies
 fighting = True
 #creates gold, which will be used for gold stuff
@@ -40,6 +40,8 @@ ranged_items = ['Bow', 'Longbow', 'Crossbow', 'Throwing Star', 'Blowgun']
 #creates list with all current items
 current_melee = []
 current_ranged = []
+#creates a variable that tracks the player's current dungeon level
+dungeon_level = 1
 
 shop_inventory = {
     'Dagger' : {
@@ -78,6 +80,12 @@ shop_inventory = {
     'Strength potion' : {
         'Price' : 10,
         'Quantity' : 2,
+        'Type' : 'Consumable'
+    },
+
+    'Health potion' : {
+        'Price' : 6,
+        'Quantity' : 3,
         'Type' : 'Consumable'
     }
 }
@@ -761,54 +769,113 @@ def empty_room():
 
 #creates a map room variable which shows the player a map of where they've been to
 def map():
-    #creates LOCAL rows and columns, used for later logic
-    row_local = -1
-    column_local = 0
-    #creates a list with the same size as the dungeon and fills it with ?
-    map_room_list = [
-        ['?', '?', '?', '?'],
-        ['?', '?', '?', '?'],
-        ['?', '?', '?', '?'],
-        ['?', '?', '?', '?'],
-    ]
-
-    for room in dungeon_1:
-        #sets row_local and column_local to 0
-        row_local += 1
+    #makes a 4x4 grid, used on the first floor
+    if dungeon_level == 1:
+        #creates LOCAL rows and columns, used for later logic
+        row_local = -1
         column_local = 0
-        for subroom in room:
-            #checks every room in dungeon_1_visited, and if you've been there adds the corresponding symbol
-            if dungeon_1_visited[row_local][column_local] == True:
-                if dungeon_1[row_local][column_local] == enemy_room:
-                    map_room_list[row_local][column_local] = 'x'
-                if dungeon_1[row_local][column_local] == empty_room:
-                    map_room_list[row_local][column_local] = ' '
-                if dungeon_1[row_local][column_local] == gold_room:
-                    map_room_list[row_local][column_local] = '$'
-                if dungeon_1[row_local][column_local] == 'Entrance':
-                    map_room_list[row_local][column_local] = ' '
-                if dungeon_1[row_local][column_local] == miniboss:
-                    map_room_list[row_local][column_local] = 'X'
-                if dungeon_1[row_local][column_local] == rest_room:
-                    map_room_list[row_local][column_local] = '*'
-            if row == row_local and column == column_local:
-                map_room_list[row_local][column_local] = '@'
-            column_local += 1
+        #creates a list with the same size as the dungeon and fills it with ?
+        map_room_list = [
+            ['?', '?', '?', '?'],
+            ['?', '?', '?', '?'],
+            ['?', '?', '?', '?'],
+            ['?', '?', '?', '?'],
+        ]
 
-    #displays the map with the symbols filled in depending on where you've been
-    print("You open your map. You fill it in with everywhere you've been so far.")
-    input()
-    print("Your player is represented by the @ symbol")
-    print("+---+---+---+---+")
-    print(f"| {map_room_list[0][0]} | {map_room_list[0][1]} | {map_room_list[0][2]} | {map_room_list[0][3]} |")
-    print("+---+---+---+---+")
-    print(f"| {map_room_list[1][0]} | {map_room_list[1][1]} | {map_room_list[1][2]} | {map_room_list[1][3]} |")
-    print("+---+---+---+---+")
-    print(f"| {map_room_list[2][0]} | {map_room_list[2][1]} |###| X |")
-    print("+---+---+---+---+")
-    print(f"| {map_room_list[3][0]} | {map_room_list[3][1]} |###| {map_room_list[3][3]} |")
-    print("+---+---+---+---+")
-    input()
+        for room in dungeon_1:
+            #sets row_local and column_local to 0
+            row_local += 1
+            column_local = 0
+            for subroom in room:
+                #checks every room in dungeon_1_visited, and if you've been there adds the corresponding symbol
+                if dungeon_1_visited[row_local][column_local] == True:
+                    if dungeon_1[row_local][column_local] == enemy_room:
+                        map_room_list[row_local][column_local] = 'x'
+                    if dungeon_1[row_local][column_local] == empty_room:
+                        map_room_list[row_local][column_local] = ' '
+                    if dungeon_1[row_local][column_local] == gold_room:
+                        map_room_list[row_local][column_local] = '$'
+                    if dungeon_1[row_local][column_local] == 'Entrance':
+                        map_room_list[row_local][column_local] = ' '
+                    if dungeon_1[row_local][column_local] == miniboss:
+                        map_room_list[row_local][column_local] = 'X'
+                    if dungeon_1[row_local][column_local] == rest_room:
+                        map_room_list[row_local][column_local] = '*'
+                if row == row_local and column == column_local:
+                    map_room_list[row_local][column_local] = '@'
+                column_local += 1
+
+        #displays the map with the symbols filled in depending on where you've been
+        print("You open your map. You fill it in with everywhere you've been so far.")
+        input()
+        print("Your player is represented by the @ symbol")
+        print("The exit staircase is represented by the % symbol")
+        print("+---+---+---+---+")
+        print(f"| {map_room_list[0][0]} | {map_room_list[0][1]} | {map_room_list[0][2]} | {map_room_list[0][3]} |")
+        print("+---+---+---+---+")
+        print(f"| {map_room_list[1][0]} | {map_room_list[1][1]} | {map_room_list[1][2]} | {map_room_list[1][3]} |")
+        print("+---+---+---+---+")
+        print(f"| {map_room_list[2][0]} | {map_room_list[2][1]} |###| {map_room_list[2][3]} |")
+        print("+---+---+---+---+")
+        print(f"| {map_room_list[3][0]} | {map_room_list[3][1]} |###| % |")
+        print("+---+---+---+---+")
+        input()
+    
+    #for floor 2 of the dungeon, makes a 5x5 grid instead of a 4x4 grid
+    elif dungeon_level == 2:
+        #creates LOCAL rows and columns, used for later logic
+        row_local = -1
+        column_local = 0
+        #creates a list with the same size as the dungeon and fills it with ?
+        map_room_list = [
+            ['?', '?', '?', '?', '?'],
+            ['?', '?', '?', '?', '?'],
+            ['?', '?', '?', '?', '?'],
+            ['?', '?', '?', '?', '?'],
+            ['?', '?', '?', '?', '?']
+        ]
+
+        for room in dungeon_2:
+            #sets row_local and column_local to 0
+            row_local += 1
+            column_local = 0
+            for subroom in room:
+                #checks every room in dungeon_1_visited, and if you've been there adds the corresponding symbol
+                if dungeon_2_visited[row_local][column_local] == True:
+                    if dungeon_2[row_local][column_local] == enemy_room:
+                        map_room_list[row_local][column_local] = 'x'
+                    if dungeon_2[row_local][column_local] == empty_room:
+                        map_room_list[row_local][column_local] = ' '
+                    if dungeon_2[row_local][column_local] == gold_room:
+                        map_room_list[row_local][column_local] = '$'
+                    if dungeon_2[row_local][column_local] == 'Entrance':
+                        map_room_list[row_local][column_local] = ' '
+                    if dungeon_2[row_local][column_local] == miniboss:
+                        map_room_list[row_local][column_local] = 'X'
+                    if dungeon_2[row_local][column_local] == rest_room:
+                        map_room_list[row_local][column_local] = '*'
+                if row == row_local and column == column_local:
+                    map_room_list[row_local][column_local] = '@'
+                column_local += 1
+
+        #displays the map with the symbols filled in depending on where you've been
+        print("You open your map. You fill it in with everywhere you've been so far.")
+        input()
+        print("Your player is represented by the @ symbol")
+        print("The exit staircase is represented by the % symbol")
+        print("+---+---+---+---+---+")
+        print(f"| {map_room_list[0][0]} | {map_room_list[0][1]} | {map_room_list[0][2]} |###| {map_room_list[0][4]} |")
+        print("+---+---+---+---+---+")
+        print(f"| {map_room_list[1][0]} | {map_room_list[1][1]} | {map_room_list[1][2]} |###| {map_room_list[1][4]} |")
+        print("+---+---+---+---+---+")
+        print(f"| {map_room_list[2][0]} | {map_room_list[2][1]} | {map_room_list[2][2]} | {map_room_list[2][3]} | {map_room_list[2][4]} |")
+        print("+---+---+---+---+---+")
+        print(f"|###|###| {map_room_list[3][2]} | {map_room_list[3][3]} | {map_room_list[3][4]} |")
+        print("+---+---+---+---+---+")
+        print(f"| % | {map_room_list[4][1]} | {map_room_list[4][2]} | {map_room_list[4][3]} | {map_room_list[4][4]} |")
+        print("+---+---+---+---+---+")
+        input()
+
 
 #entrance to the boss room, has a mini puzzle thing
 def entrance_boss():
@@ -1002,6 +1069,7 @@ name = input("Please enter your name adventurer! ")
 #intro text, if they are a developer then open a debug panel 
 if name == 'dev':
     print("Welcome to the dev panel! Choose your coordinates please")
+    dungeon_level = int(input("Input dungeon layer "))
     row = int(input("Input row (up and down) "))
     column = int(input("Input column (left and right) "))
     player_data["Gold"] = int(input("Input gold "))
@@ -1054,7 +1122,8 @@ else:
 
 action = 99
 #action loop, the player can choose between opening their map, moving, and accessing their inventory
-direction_chosen = True
+if dungeon_level == 1:
+    direction_chosen = True
 while direction_chosen:
 
     possible_directions = find_directions()
@@ -1203,6 +1272,9 @@ print(f"Congratulations {name}! You have finished the first layer of the Great C
 descending_action = input("What would you like to do? (Continue/Inventory) ").capitalize()
 if descending_action == 'Inventory':
     acessing_inventory = True
+else:
+    acessing_inventory = False
+
 while acessing_inventory:
     print("This is your inventory.")
     #chatGPT made this
@@ -1242,6 +1314,78 @@ while acessing_inventory:
 
 
 print("You continue through the staircase and walk into a new room...")
+dungeon_level = 2
+
+##creates a bunch of rooms used on layer 2
+
+def vault_room():
+    print("You walk into the room and see a strange fixture on the wall.")
+    print("It looks like a keyhole.")
+    if 'Key' in player_inventory:
+        use_key = input("Use key? (Yes/No)").capitalize()
+        if use_key == 'Yes':
+            print("You put the key in and turn it...")
+            time.sleep(1)
+            print("It opens!")
+            print("You find 15 gold and a health potion.")
+            #chatgpt made the .get part
+            player_inventory['Health potion'] = player_inventory.get('Health potion', 0) + 1
+            player_data['Gold'] += 15
+            print(f"You now have {player_data['Gold']} gold.")
+            input()
+        else:
+            print("You decide not to use your key.")
+    else:
+        print("There doesn't seem to be anything else to do here.")
+
+def key_room():
+    print("You see a key on the floor. Do you take it?")
+    take_key = input("Pick up the key? (Yes/No)").capitalize()
+    if take_key == 'Yes':
+        print("You take the key. It's strangely heavy.")
+        player_inventory['Key'] = 1
+    else:
+        print("You decide to leave the key. You don't trust it anyways.")
+
+def lore_room():
+    if dungeon_level == 2:
+        if row == 0 and column == 1:
+            print("You walk into the room and see something written on the walls.")
+            print("It says 'GET OUT. TRUST NOBODY")
+            print("It has a date. Almost 200 years ago.")
+            input()
+            print("You decide to leave.")
+        elif row == 4 and column == 3:
+            print("You walk into the room and see a journal on the floor.")
+            print("Most of the journal entries are pretty boring, just normal adventuring.")
+            print("The author of the journal then enters the great coil.")
+            print("The journal does a great job of documenting his mental decline.")
+            print("Near the end the journal is filled with one word, repeated over and over.")
+            print("Olran. Olran. Olran. Olran. Olran")
+            take_journal = input("Creepy. Do you want to take the journal? (Yes/No)").capitalize()
+            if take_journal == 'Yes':
+                print("You take the jornal with you.")
+                player_inventory['Old journal'] = 1
+                print("There's nothing else in the room, so you decide to leave.")
+            else:
+                print("You're too creeped out to take the journal. You decide to leave it.")
+
+
+dungeon_2 = [
+    [vault_room,lore_room,'Moving enemy','###','Shop',],
+    ['Entrance',gold_room,'Moving enemy','###','Miniboss',],
+    ['Shorcut',empty_room,'Moving enemy','Trap','Shortcut',],
+    ['###','###',gold_room,rest_room,key_room,],
+    ['Staircase','Boss','Boss entrance',lore_room,'Blacksmith',]
+]
+
+dungeon_2_visited = [
+    [False, False, False, False, False],
+    [True, False, False, False, False],
+    [False, False, False, False, False],
+    [False, False, False, False, False],
+    [False, False, False, False, False]
+]
 
 action = 99
 direction_chosen = True
