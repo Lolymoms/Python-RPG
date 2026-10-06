@@ -193,31 +193,60 @@ def number(asking, parameter=None):
 #uses coordinates to find what directions the player can go
 def find_directions():
     possible_directions = [1, 2, 3, 4]
-    #edges of the map
-    if row == 0:
-        possible_directions.remove(1)
-    if row == 3:
-        possible_directions.remove(4)
-    if column == 0:
-        possible_directions.remove(2)
-    if column == 3:
-        possible_directions.remove(3)
+    if dungeon_level == 1:
+        #edges of the map
+        if row == 0:
+            possible_directions.remove(1)
+        if row == 3:
+            possible_directions.remove(4)
+        if column == 0:
+            possible_directions.remove(2)
+        if column == 3:
+            possible_directions.remove(3)
 
-    #wall logic
-    if row == 2 and column == 1:
-        possible_directions.remove(3)
-    if row == 3 and column == 1:
-        possible_directions.remove(3)
+        #wall logic
+        if row == 2 and column == 1:
+            possible_directions.remove(3)
+        if row == 3 and column == 1:
+            possible_directions.remove(3)
 
-    if row == 1 and column == 2:
-        possible_directions.remove(4)
+        if row == 1 and column == 2:
+            possible_directions.remove(4)
 
-    #makes the player fight the boss if they don't pry open the gates
-    if column == 3 and row > 0:
-        possible_directions.clear()
-        possible_directions.append(4)
+        #makes the player fight the boss if they don't pry open the gates
+        if column == 3 and row > 0:
+            possible_directions.clear()
+            possible_directions.append(4)
+    elif dungeon_level == 2:
+        #edges of the map
+        if row == 0:
+            possible_directions.remove(1)
+        if row == 4:
+            possible_directions.remove(4)
+        if column == 0:
+            possible_directions.remove(2)
+        if column == 4:
+            possible_directions.remove(3)
 
+        #wall logic
+        if row == 2 and column == 0:
+            possible_directions.remove(4)
+        if row == 2 and column == 1:
+            possible_directions.remove(4)
+        if row == 3 and column == 2:
+            possible_directions.remove(2)
 
+        if row == 0 and column == 2:
+            possible_directions.remove(3)
+        if row == 1 and column == 2:
+            possible_directions.remove(3)
+        if row == 2 and column == 3:
+            possible_directions.remove(1)
+        if row == 1 and column == 4:
+            possible_directions.remove(2)
+        if row == 0 and column == 4:
+            possible_directions.remove(2)
+        
     return possible_directions
 
 
@@ -1046,6 +1075,42 @@ def shop():
 
     print("There's nothing else to do here but leave.")
 
+def level_up():
+    player_data["Level"] += 1
+    player_data["Experience"] -= level_up_experience
+    player_data["Max Health"] += (5 + (2 * player_data["Level"]))
+    player_data["Health"] = player_data['Max Health']
+    player_data["Strength"] += 3
+    player_data['Max Defense'] += 3
+    player_data["Defense"] = player_data["Max Defense"]
+    level_up_experience = int(level_up_experience * 1.5)
+    print(f"Level up! You are now level {player_data['Level']}.")
+    print(f"You have been healed, and your max HP has been increased! Your health is {player_data['Health']}")
+    level_up = input("What do you want to increase further? (Strength/Health/Defense) ").capitalize()
+    if level_up == 'Strength':
+        player_data["Strength"] += 3
+        print("You train and increase your strength.")
+        input()
+    elif level_up == 'Health':
+        player_data["Max Health"] += 10
+        player_data["Health"] = player_data["Max Health"]
+        print("You drink some homemade stew and can take more of a beating.")
+        input()
+    elif level_up == 'Defense':
+        player_data['Max Defense'] += 3
+        player_data["Defense"] = player_data["Max Defense"]
+        print("You train your dodging and increase your defense")
+        input()
+    else:
+        player_data["Strength"] += 3
+        print("You aren't sure what to do, so you train and increase your strength.")
+        input()
+
+    print("Here are your new player stats.")
+    #chatGPT made this
+    for stat, value in player_data.items():
+        print(f"{stat}: {value}")
+    input()
 
 #creates dungeon_1 map
 dungeon_1 = [
@@ -1226,42 +1291,8 @@ while direction_chosen:
             print("You've been here before! There's nothing more to do.")
             print("")
 
-    while player_data["Experience"] >= level_up_experience:
-        player_data["Level"] += 1
-        player_data["Experience"] -= level_up_experience
-        player_data["Max Health"] += (5 + (2 * player_data["Level"]))
-        player_data["Health"] = player_data['Max Health']
-        player_data["Strength"] += 3
-        player_data['Max Defense'] += 3
-        player_data["Defense"] = player_data["Max Defense"]
-        level_up_experience = int(level_up_experience * 1.5)
-        print(f"Level up! You are now level {player_data['Level']}.")
-        print(f"You have been healed, and your max HP has been increased! Your health is {player_data['Health']}")
-        level_up = input("What do you want to increase further? (Strength/Health/Defense) ").capitalize()
-        if level_up == 'Strength':
-            player_data["Strength"] += 3
-            print("You train and increase your strength.")
-            input()
-        elif level_up == 'Health':
-            player_data["Max Health"] += 10
-            player_data["Health"] = player_data["Max Health"]
-            print("You drink some homemade stew and can take more of a beating.")
-            input()
-        elif level_up == 'Defense':
-            player_data['Max Defense'] += 3
-            player_data["Defense"] = player_data["Max Defense"]
-            print("You train your dodging and increase your defense")
-            input()
-        else:
-            player_data["Strength"] += 3
-            print("You aren't sure what to do, so you train and increase your strength.")
-            input()
-
-        print("Here are your new player stats.")
-        #chatGPT made this
-        for stat, value in player_data.items():
-            print(f"{stat}: {value}")
-        input()
+    if player_data["Experience"] >= level_up_experience:
+        level_up()
 
     if action == 3:
         shop()
@@ -1390,5 +1421,101 @@ dungeon_2_visited = [
 action = 99
 direction_chosen = True
 while direction_chosen:
-    print("Not done yet")
-    direction_chosen = False
+
+    possible_directions = find_directions()
+
+    if name == 'dev':
+        print("Dev panel again!")
+        print(f"You are currently in row {row} and column {column}")
+        print(f"possible directions returned {possible_directions}")
+        input()
+        print("Dungeon visited currently has")
+        print(dungeon_2_visited)
+        input()
+
+    #if a player runs from a fight, makes them go a random direction
+    if action == 1:
+        dungeon_2_visited[row][column] = False
+        direction = random.choice(possible_directions)
+        action = 0
+        movement = 'Run'
+        print("You run into a random room.")
+        input()
+    #makes the player move on their first entrance to the new level
+    elif action == 99:
+        movement = 'Move'
+        action = 0
+    else:
+        movement = input("What would you like to do? (Inventory/Move/Map) ").capitalize()
+    
+
+    if movement == 'Inventory':
+        print("This is your inventory.")
+        #chatGPT made this
+        for item, value in player_inventory.items():
+            print(f"{item}: {value}")
+        inventory_action = input(f"What would you like to do? (Melee/Ranged/Leave) ").capitalize()
+        if inventory_action == 'Melee':
+            current_melee.clear()
+            for item in player_inventory:
+                if item in melee_items:
+                    current_melee.append(item)
+                    print(item)
+            melee_change = input("What melee item would you like to equip? ").capitalize()
+            if melee_change in current_melee:
+                melee = melee_change
+                print(f"{melee} equipped!")
+                input()
+            else:
+                print("Not a valid item!")
+        elif inventory_action == 'Ranged':
+            current_ranged.clear()
+            for item in player_inventory:
+                if item in ranged_items:
+                    current_ranged.append(item)
+                    print(item)
+            ranged_change = input("What ranged item would you like to equip? ").capitalize()
+            if ranged_change in current_ranged:
+                ranged = ranged_change
+                print(f"{ranged} equipped!")
+                input()
+            else:
+                print("Not a valid item!")
+    elif movement == 'Move':
+        direction = directions(*possible_directions)
+
+        if direction == 1:
+            row -= 1
+        elif direction == 2:
+            column -= 1
+        elif direction == 3:
+            column += 1
+        elif direction == 4:
+            row += 1
+    elif movement == 'Map':
+        map()
+    elif movement == 'Run':
+        if direction == 1:
+            row -= 1
+        elif direction == 2:
+            column -= 1
+        elif direction == 3:
+            column += 1
+        elif direction == 4:
+            row += 1
+    else:
+        print("Please select a valid option!")
+
+    
+    #if the player has never been to a room, trigger the action in the room
+    if dungeon_2_visited[row][column] == False:
+        dungeon_2_visited[row][column] = True
+        action = dungeon_2[row][column]()
+    #if the player has been to a room, don't trigger anything
+    elif dungeon_2_visited[row][column] == True:
+        if movement == 'Move':
+            print("You've been here before! There's nothing more to do.")
+            print("")
+
+    if player_data["Experience"] >= level_up_experience:
+        level_up()
