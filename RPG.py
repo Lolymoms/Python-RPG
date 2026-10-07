@@ -466,7 +466,7 @@ def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength
                 returning = 1
                 fighting_patrolling_goblins = False
             #easier to run if you are underleveled
-            elif randomnum+2 > strength:
+            elif randomnum+2 > strength and underleveled:
                 print("You manage to escape! Lucky for you.")
                 fighting = False
                 returning = 1
@@ -581,13 +581,13 @@ def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength
             elif attack_type == 'Special attack' and player_data["Special Attack Available"] == False:
                 print("You already used your special attack! You miss this turn.")
             else:
-                print("You didn't chose a valid attack type. You miss this turn.")
+                print("You didn't choose a valid attack type. You miss this turn.")
         elif action == 'Defend':
             print("You hunker down and try to defend better against the next enemy attack.")
             player_data['Defense'] += (2 * player_data["Level"])
             defending = True
         else:
-            print("You didn't chose a valid option. You miss this turn.")
+            print("You didn't choose a valid option. You miss this turn.")
 
         if health > 0 and fighting:
             defense = max_defense
@@ -834,6 +834,8 @@ def map():
                         map_room_list[row_local][column_local] = 'X'
                     elif dungeon_1[row_local][column_local] == rest_room:
                         map_room_list[row_local][column_local] = '*'
+                    else:
+                        map_room_list[row_local][column_local] = ' '
                 if row == row_local and column == column_local:
                     map_room_list[row_local][column_local] = '@'
                 column_local += 1
@@ -972,7 +974,7 @@ def staircase():
     input()
     print(f"Congratulations {name}! You have completed the first floor of the dungeon! Many adventures await you yet, but first a break...")
     player_data["Experience"] += (level_up_experience - player_data["Experience"])
-    return 3
+    return 4
 
 def rest_room():
     print("You walk into the room and see a small firepit on the floor.")
@@ -1306,21 +1308,23 @@ while direction_chosen:
     else:
         print("Please select a valid option!")
 
-    
-    #if the player has never been to a room, trigger the action in the room
-    if dungeon_1_visited[row][column] == False:
-        dungeon_1_visited[row][column] = True
-        action = dungeon_1[row][column]()
-    #if the player has been to a room, don't trigger anything
-    elif dungeon_1_visited[row][column] == True:
-        if movement == 'Move':
-            print("You've been here before! There's nothing more to do.")
-            print("")
+    if movement == 'Move' or movement == 'Run':
+        #if the player has never been to a room, trigger the action in the room
+        if dungeon_1_visited[row][column] == False:
+            dungeon_1_visited[row][column] = True
+            action = dungeon_1[row][column]()
+        #if the player has been to a room, don't trigger anything
+        elif dungeon_1_visited[row][column] == True:
+            if movement == 'Move':
+                print("You've been here before! There's nothing more to do.")
+                print("")
 
     if player_data["Experience"] >= level_up_experience:
         level_up()
 
     if action == 3:
+        staircase()
+    if action == 4:
         shop()
         direction_chosen = False
 
@@ -1423,7 +1427,7 @@ def lore_room():
             print("Olran. Olran. Olran. Olran. Olran")
             take_journal = input("Creepy. Do you want to take the journal? (Yes/No)").capitalize()
             if take_journal == 'Yes':
-                print("You take the jornal with you.")
+                print("You take the journal with you.")
                 player_inventory['Old journal'] = 1
                 print("There's nothing else in the room, so you decide to leave.")
             else:
@@ -1434,7 +1438,7 @@ def moving_enemy():
     if row == moving_enemy_row and moving_enemy_alive_2 == True:
         print("You encounter a group of patrolling goblins!")
         fighting_patrolling_goblins = True
-        encounter(**goblins, amount=random.randint(3,6))
+        return encounter(**goblins, amount=random.randint(3,6))
     else:
         print("You don't see anything, but you recognize this as an enemy patrol route.")
         print("You decide to leave before you encounter them.")
@@ -1542,7 +1546,7 @@ def entrance_boss_2():
         return 3
     else:
         print("You decide not to enter for now.")
-        dungeon_2_visited[row][column] = False
+        return 4
 
 def boss_2():
     orc_boss = {
@@ -1615,8 +1619,12 @@ while direction_chosen:
         possible_directions.append(2)
         movement = 'Move'
         action = 0
+    elif action == 4:
+        dungeon_2_visited[row][column] = False
+        possible_directions.remove(2)
     elif action == 10:
         direction_chosen = False
+        break
     #makes the player move on their first entrance to the new level
     elif action == 99:
         movement = 'Move'
@@ -1723,7 +1731,7 @@ while direction_chosen:
         moving_enemy_row -= 1
 
     if row == moving_enemy_row and column == 2 and moving_enemy_alive_2 == True:
-        print("Patroling goblins found you!")
+        print("Patrolling goblins found you!")
         input()
         fighting_patrolling_goblins = True
         action = encounter(**goblins, amount=random.randint(3,6))
