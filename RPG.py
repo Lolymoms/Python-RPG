@@ -31,6 +31,8 @@ possible_directions = []
 empty_room_number = 1
 #amount of experience needed to level up
 level_up_experience = 100
+#used to track if the player has seen the blacksmith before, used in blacksmith()
+visited_blacksmith = False
 #creates ranged and melee variables, used in player_data
 ranged = 'Bow'
 melee = 'Sword'
@@ -138,18 +140,6 @@ feral_dog = {
    'cl_enc' : 1,
 }
 
-cube_miniboss = {
-   'name_enc' : 'Gelatinous Cube',
-   'health' : 20,
-   'damage_enc' : 5,
-   'damage_enc_ranged' : 0,
-   'defense' : 2,
-   'strength' : 5,
-   'armor_enc' : 0,
-   'cl_enc' : 1,
-   'boss' : True,
-   'special_attack' : 'Yes'
-}
 
 baby_orc = {
    'name_enc' : 'Baby Orc',
@@ -162,18 +152,6 @@ baby_orc = {
    'cl_enc' : 2,
 }
 
-warden_boss = {
-   'name_enc' : 'Warden Boss',
-   'health' : 25,
-   'damage_enc' : 6,
-   'damage_enc_ranged' : 0,
-   'defense' : 3,
-   'strength' : 4,
-   'armor_enc' : 2,
-   'cl_enc' : 2,
-   'boss' : True,
-   'special_attack' : 'Yes'
-}
 
 #all the functions for the program
 
@@ -248,6 +226,11 @@ def find_directions():
             possible_directions.remove(2)
         if row == 0 and column == 4:
             possible_directions.remove(2)
+
+        #boss logic
+        if row == 4 and column < 2:
+            possible_directions.clear()
+            possible_directions.append(2)
         
     return possible_directions
 
@@ -760,6 +743,20 @@ def miniboss():
 
     if action == 'Yes':
         print("You feel ready. You enter the room.")
+
+        cube_miniboss = {
+        'name_enc' : 'Gelatinous Cube',
+        'health' : 20,
+        'damage_enc' : 5,
+        'damage_enc_ranged' : 0,
+        'defense' : 2,
+        'strength' : 5,
+        'armor_enc' : 0,
+        'cl_enc' : 1,
+        'boss' : True,
+        'special_attack' : 'Yes'
+    }
+        
         return encounter(**cube_miniboss)
     else:
         dungeon_1_visited[row][column] = False
@@ -829,15 +826,15 @@ def map():
                 if dungeon_1_visited[row_local][column_local] == True:
                     if dungeon_1[row_local][column_local] == enemy_room:
                         map_room_list[row_local][column_local] = 'x'
-                    if dungeon_1[row_local][column_local] == empty_room:
+                    elif dungeon_1[row_local][column_local] == empty_room:
                         map_room_list[row_local][column_local] = ' '
-                    if dungeon_1[row_local][column_local] == gold_room:
+                    elif dungeon_1[row_local][column_local] == gold_room:
                         map_room_list[row_local][column_local] = '$'
-                    if dungeon_1[row_local][column_local] == 'Entrance':
+                    elif dungeon_1[row_local][column_local] == 'Entrance':
                         map_room_list[row_local][column_local] = ' '
-                    if dungeon_1[row_local][column_local] == miniboss:
+                    elif dungeon_1[row_local][column_local] == miniboss:
                         map_room_list[row_local][column_local] = 'X'
-                    if dungeon_1[row_local][column_local] == rest_room:
+                    elif dungeon_1[row_local][column_local] == rest_room:
                         map_room_list[row_local][column_local] = '*'
                 if row == row_local and column == column_local:
                     map_room_list[row_local][column_local] = '@'
@@ -882,16 +879,18 @@ def map():
                 if dungeon_2_visited[row_local][column_local] == True:
                     if dungeon_2[row_local][column_local] == enemy_room:
                         map_room_list[row_local][column_local] = 'x'
-                    if dungeon_2[row_local][column_local] == empty_room:
+                    elif dungeon_2[row_local][column_local] == empty_room:
                         map_room_list[row_local][column_local] = ' '
-                    if dungeon_2[row_local][column_local] == gold_room:
+                    elif dungeon_2[row_local][column_local] == gold_room:
                         map_room_list[row_local][column_local] = '$'
-                    if dungeon_2[row_local][column_local] == 'Entrance':
+                    elif dungeon_2[row_local][column_local] == 'Entrance':
                         map_room_list[row_local][column_local] = ' '
-                    if dungeon_2[row_local][column_local] == miniboss:
+                    elif dungeon_2[row_local][column_local] == miniboss:
                         map_room_list[row_local][column_local] = 'X'
-                    if dungeon_2[row_local][column_local] == rest_room:
+                    elif dungeon_2[row_local][column_local] == rest_room:
                         map_room_list[row_local][column_local] = '*'
+                    else:
+                        map_room_list[row_local][column_local] = ' '
                 if row == row_local and column == column_local:
                     map_room_list[row_local][column_local] = '@'
                 column_local += 1
@@ -952,6 +951,19 @@ def boss_1():
         print("You decide to leave the bottle alone.")
     input()
     print("You continue forward and see a Warden!")
+
+    warden_boss = {
+   'name_enc' : 'Warden Boss',
+   'health' : 25,
+   'damage_enc' : 6,
+   'damage_enc_ranged' : 0,
+   'defense' : 3,
+   'strength' : 4,
+   'armor_enc' : 2,
+   'cl_enc' : 2,
+   'boss' : True,
+   'special_attack' : 'Yes'
+}
     encounter(**warden_boss)
     return 3
 
@@ -1372,10 +1384,10 @@ def vault_room():
     print("You walk into the room and see a strange fixture on the wall.")
     print("It looks like a keyhole.")
     if 'Key' in player_inventory:
-        use_key = input("Use key? (Yes/No)").capitalize()
+        use_key = input("Use key? (Yes/No) ").capitalize()
         if use_key == 'Yes':
             print("You put the key in and turn it...")
-            time.sleep(1)
+            input()
             print("It opens!")
             print("You find 15 gold and a health potion.")
             #chatgpt made the .get part
@@ -1390,7 +1402,7 @@ def vault_room():
 
 def key_room():
     print("You see a key on the floor. Do you take it?")
-    take_key = input("Pick up the key? (Yes/No)").capitalize()
+    take_key = input("Pick up the key? (Yes/No) ").capitalize()
     if take_key == 'Yes':
         print("You take the key. It's strangely heavy.")
         player_inventory['Key'] = 1
@@ -1405,7 +1417,7 @@ def lore_room():
             print("It has a date. Almost 200 years ago.")
             input()
             print("You decide to leave.")
-        elif row == 4 and column == 3:
+        elif row == 2 and column == 1:
             print("You walk into the room and see a journal on the floor.")
             print("Most of the journal entries are pretty boring, just normal adventuring.")
             print("The author of the journal then enters the great coil.")
@@ -1429,13 +1441,117 @@ def moving_enemy():
         print("You decide to leave before you encounter them.")
         input()
 
+def shortcut():
+    global row
+    global column
+    dungeon_2_visited[row][column] = False
+    print("You see a door that looks to take you somewhere else in the dungeon.")
+    use_shortcut = input("Walk through? (Yes/No) ").capitalize
+    if use_shortcut == 'No':
+        return
+    elif column == 0:
+        column = 4
+        print("You walk through and find yourself somewhere new.")
+    elif column == 4:
+        column = 0
+        print("You walk through and find yourself somewhere new.")
+
+def miniboss_2():
+    print("You walk into the room and feel a strong sense of unease.")
+    approach_encounter = input("Are you sure you want to continue? (Yes/No) ").capitalize()
+    if approach_encounter == 'Yes':
+        print("You walk forward. You see a large snake!")
+        snake_miniboss = {
+    'name_enc' : 'Cobra',
+    'health' : 12,
+    'damage_enc' : 12,
+    'damage_enc_ranged' : 0,
+    'defense' : 0,
+    'strength' : 3,
+    'armor_enc' : 1,
+    'cl_enc' : 2,
+    'flying' : False,
+    'boss' : True,
+    'amount' : 1,
+    'special_attack' : 'Yes'
+    }
+        encounter(**snake_miniboss)
+    else:
+        print("You decide not to continue.")
+        return 2
+    
+def miniboss_chest():
+    print("You enter the room and see a strange item on a table and a chest.")
+    print("You go closer and see the handle of what seems like a sword.")
+    take_things = input("Take the sword handle? (Yes/No) ").capitalize()
+    if take_things == 'No':
+        print("You decide to leave the sword handle.")
+    else:
+        player_inventory['Legendary sword piece'] = 1
+        print("You take the sword handle.")
+        input()
+    print("You also open the chest in the room. You open it and see some gold and a crossbow!")
+    take_things = input("Take the gold and crossbow? (Yes/No) ").capitalize()
+    if take_things == 'No':
+        print("You decide to leave the valuable and very useful items.")
+    else:
+        print("You take the gold and crossbow.")
+        player_data['Gold'] += 12
+        print(f"You have {player_data['Gold']} gold.")
+        #still chatgpt for .get
+        player_inventory['Crossbow'] = 9
+
+def blacksmith():
+    global visited_blacksmith
+    visited_blacksmith = True
+    print("You walk into the room and see a house. You notice a fire from inside, and a man humming.")
+    print("You decide to enter. You walk in and see a large and muscular man.")
+    print("He turns slowly...")
+    input()
+    print("He turns to you. You see his face, gruff and covered in coal.")
+    input()
+    print("He smiles warmly.")
+    print("'Hello adventurer!' He says, 'How did you find your way over here?'")
+    print("Well it matters not. I can sharpen your weapon if you'd like..?")
+    sharpen_weapon = input("Would you like to sharpen your weapon? (Yes/No) ").capitalize()
+    if sharpen_weapon == 'No':
+        print("'I understand why. Trusting people in this dungeon is a bad idea...' the man says")
+        print("'Well in any case I'll be on my way soon. Maybe we'll see each other later!'")
+    else:
+        player_inventory[melee] += 2
+        print("'Amazing!' He says, 'I'll get straight to work!'")
+        input()
+        print("5 minutes pass...")
+        input()
+        print("10 minutes...")
+        input()
+        print("15 minutes...")
+        input()
+        print("After a long time waiting, standing uncomfortably, the man returns with a sharpened weapon.")
+        print("'Here you go!' He says, beaming, 'Well, I have to go, but maybe we'll see each other again!'")
+        input()
+
+    print("There's nothing more to do, you decide to leave")
+
+def entrance_boss_2():
+    print("You see an ominous door. You feel uneasy.")
+    if player_data["Level"] < 3:
+        print("You don't feel ready for this fight. You should train more")
+    fight_boss = input("Enter the room? (Yes/No) ").capitalize()
+    if fight_boss == 'Yes':
+        print("You enter the room...")
+        return 3
+    else:
+        print("You decide not to enter for now.")
+        dungeon_2_visited[row][column] = False
+
 
 dungeon_2 = [
-    [vault_room,lore_room, moving_enemy,'###','Shop',],
-    ['Entrance',gold_room, moving_enemy,'###','Miniboss',],
-    ['Shorcut',empty_room, moving_enemy,'Trap','Shortcut',],
-    ['###','###',gold_room, rest_room, key_room,],
-    ['Staircase','Boss','Boss entrance',lore_room,'Blacksmith',]
+    [vault_room,lore_room, moving_enemy,'###', miniboss_chest,],
+    ['Entrance',gold_room, moving_enemy,'###', miniboss_2,],
+    [shortcut, lore_room, moving_enemy, rest_room, shortcut,],
+    ['###','###', gold_room, empty_room, key_room,],
+    ['Staircase','Boss','Boss entrance', enemy_room, blacksmith,]
 ]
 
 dungeon_2_visited = [
@@ -1471,6 +1587,17 @@ while direction_chosen:
         movement = 'Run'
         print("You run into a random room.")
         input()
+    #if the player leaves the miniboss, removes the ability to go up and allows the player to still fight it later
+    elif action == 2:
+        dungeon_2_visited[row][column] = False
+        possible_directions.remove(1)
+        movement = 'Move'
+        action = 0
+    elif action == 3:
+        possible_directions.clear()
+        possible_directions.append(2)
+        movement = 'Move'
+        action = 0
     #makes the player move on their first entrance to the new level
     elif action == 99:
         movement = 'Move'
@@ -1543,19 +1670,19 @@ while direction_chosen:
     else:
         print("Please select a valid option!")
 
-    
-    #if the player has never been to a room, trigger the action in the room
-    if dungeon_2_visited[row][column] == False:
-        dungeon_2_visited[row][column] = True
-        action = dungeon_2[row][column]()
-    #if the player has been to a room, don't trigger anything
-    elif dungeon_2_visited[row][column] == True:
-        #allows the player to be attacked by moving enemies even if they've already been there
-        if column == 2 and row <= 2 and movement == 'Move':
+    if movement == 'Move' or movement == 'Run':
+        #if the player has never been to a room, trigger the action in the room
+        if dungeon_2_visited[row][column] == False:
+            dungeon_2_visited[row][column] = True
             action = dungeon_2[row][column]()
-        elif movement == 'Move':
-            print("You've been here before! There's nothing more to do.")
-            print("")
+        #if the player has been to a room, don't trigger anything
+        elif dungeon_2_visited[row][column] == True:
+            #allows the player to be attacked by moving enemies even if they've already been there
+            if column == 2 and row <= 2 and movement == 'Move':
+                action = dungeon_2[row][column]()
+            elif movement == 'Move':
+                print("You've been here before! There's nothing more to do.")
+                print("")
 
     if player_data["Experience"] >= level_up_experience:
         level_up()
