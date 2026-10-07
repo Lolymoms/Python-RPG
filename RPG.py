@@ -453,6 +453,7 @@ def encounter(name_enc, health, damage_enc, damage_enc_ranged, defense, strength
         if player_inventory["Arrows"] <= 0:
             can_use_ranged = False
         if many_enemies == True:
+            #for plurality, add s to current amount and make all enemies names singular 
             print(f"There are {current_amount} {name_enc} fighting you!")
         else:
             print(f"The {name_enc} has {health} HP.")
@@ -955,11 +956,11 @@ def boss_1():
     warden_boss = {
    'name_enc' : 'Warden Boss',
    'health' : 25,
-   'damage_enc' : 6,
+   'damage_enc' : 5,
    'damage_enc_ranged' : 0,
    'defense' : 3,
    'strength' : 4,
-   'armor_enc' : 2,
+   'armor_enc' : 1,
    'cl_enc' : 2,
    'boss' : True,
    'special_attack' : 'Yes'
@@ -1160,12 +1161,18 @@ dungeon_1_visited = [
 name = input("Please enter your name adventurer! ")
 
 #intro text, if they are a developer then open a debug panel 
-if name == 'dev':
+if name == 'dev' or name == 'onetimedev':
     print("Welcome to the dev panel! Choose your coordinates please")
     dungeon_level = int(input("Input dungeon layer "))
     row = int(input("Input row (up and down) "))
     column = int(input("Input column (left and right) "))
     player_data["Gold"] = int(input("Input gold "))
+    dev_level = int(input("What level would you like? "))
+    dev_level -= 1
+    player_data["Experience"] = ((100 * 1.5)* dev_level)
+    if dev_level > 0:
+        while player_data["Experience"] > level_up_experience:
+            level_up()
 else:
     tutorial = input(f"Welcome {name}! Would you like a tutorial? (Yes/No) ").capitalize()
     if tutorial == 'Yes':
@@ -1323,7 +1330,7 @@ while direction_chosen:
         level_up()
 
     if action == 3:
-        staircase()
+        action = staircase()
     if action == 4:
         shop()
         direction_chosen = False
