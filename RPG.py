@@ -21,8 +21,6 @@ direction_chosen = False
 fighting = True
 #creates gold, which will be used for gold stuff
 gold = 0
-#creates shop_level variable, which will change which shop you get
-shop_level = 1
 #creates the many_enemies list, which will be used for when you fight multiple enemies
 many_enemies = []
 #creates a list that will be used for the directions() function
@@ -37,8 +35,8 @@ visited_blacksmith = False
 ranged = 'Bow'
 melee = 'Sword'
 #creates lists with all ranged and melee items
-melee_items = ['Sword', 'Longsword', 'Dagger', 'Mace', 'Scimitar', 'Legendary Sword']
-ranged_items = ['Bow', 'Longbow', 'Crossbow', 'Throwing Star', 'Blowgun']
+melee_items = ['Sword', 'Longsword', 'Dagger', 'Mace', 'Scimitar', 'Legendary sword']
+ranged_items = ['Bow', 'Longbow', 'Crossbow', 'Throwing star', 'Blowgun']
 #creates list with all current items
 current_melee = []
 current_ranged = []
@@ -992,8 +990,7 @@ def rest_room():
         print("You decide to leave the firepit.")
 
 def shop():
-    global shop_level
-    if shop_level == 1:
+    if dungeon_level == 1:
         print("You descend the stairs after killing the warden and see a fairly small area with a shop")
         print("A strange creature sits at the counter. He looks very bored.")
         print("As soon as he sees you, his eyes light up.")
@@ -1038,7 +1035,7 @@ def shop():
         elif 'Damage' not in stats and stats["Quantity"] > 0:
             print(f"{item} - {stats['Price']} gold - {stats['Quantity']} left")
 
-    
+    bought_something = False
     while shopping:
         buying_more_than_one_thing = False
         #chatGPT made this
@@ -1433,8 +1430,10 @@ def lore_room():
                 print("You're too creeped out to take the journal. You decide to leave it.")
 
 def moving_enemy():
+    global fighting_patrolling_goblins
     if row == moving_enemy_row and moving_enemy_alive_2 == True:
         print("You encounter a group of patrolling goblins!")
+        fighting_patrolling_goblins = True
         encounter(**goblins, amount=random.randint(3,6))
     else:
         print("You don't see anything, but you recognize this as an enemy patrol route.")
@@ -1446,7 +1445,7 @@ def shortcut():
     global column
     dungeon_2_visited[row][column] = False
     print("You see a door that looks to take you somewhere else in the dungeon.")
-    use_shortcut = input("Walk through? (Yes/No) ").capitalize
+    use_shortcut = input("Walk through? (Yes/No) ").capitalize()
     if use_shortcut == 'No':
         return
     elif column == 0:
@@ -1551,7 +1550,7 @@ dungeon_2 = [
     ['Entrance',gold_room, moving_enemy,'###', miniboss_2,],
     [shortcut, lore_room, moving_enemy, rest_room, shortcut,],
     ['###','###', gold_room, empty_room, key_room,],
-    ['Staircase','Boss','Boss entrance', enemy_room, blacksmith,]
+    ['Staircase','Boss', entrance_boss_2, enemy_room, blacksmith,]
 ]
 
 dungeon_2_visited = [
@@ -1706,4 +1705,5 @@ while direction_chosen:
     if row == moving_enemy_row and column == 2 and moving_enemy_alive_2 == True:
         print("Patroling goblins found you!")
         input()
+        fighting_patrolling_goblins = True
         encounter(**goblins, amount=random.randint(3,6))
