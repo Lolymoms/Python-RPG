@@ -1544,13 +1544,31 @@ def entrance_boss_2():
         print("You decide not to enter for now.")
         dungeon_2_visited[row][column] = False
 
+def boss_2():
+    orc_boss = {
+   'name_enc' : 'Orc Boss',
+   'health' : 35,
+   'damage_enc' : 10,
+   'damage_enc_ranged' : 0,
+   'defense' : 1,
+   'strength' : 6,
+   'armor_enc' : 4,
+   'cl_enc' : 4,
+   'boss' : True,
+   'special_attack' : 'Yes'
+}
+    encounter(**orc_boss)
+
+def staircase_2():
+    print("You finally see a staircase. You decide to go down.")
+    return 10
 
 dungeon_2 = [
     [vault_room,lore_room, moving_enemy,'###', miniboss_chest,],
     ['Entrance',gold_room, moving_enemy,'###', miniboss_2,],
     [shortcut, lore_room, moving_enemy, rest_room, shortcut,],
     ['###','###', gold_room, empty_room, key_room,],
-    ['Staircase','Boss', entrance_boss_2, enemy_room, blacksmith,]
+    [staircase_2, boss_2, entrance_boss_2, enemy_room, blacksmith,]
 ]
 
 dungeon_2_visited = [
@@ -1597,6 +1615,8 @@ while direction_chosen:
         possible_directions.append(2)
         movement = 'Move'
         action = 0
+    elif action == 10:
+        direction_chosen = False
     #makes the player move on their first entrance to the new level
     elif action == 99:
         movement = 'Move'
@@ -1653,7 +1673,7 @@ while direction_chosen:
             print("You walked into a group of patrolling goblins!")
             input()
             fighting_patrolling_goblins = True
-            encounter(**goblins, amount=random.randint(3,6))
+            action = encounter(**goblins, amount=random.randint(3,6))
 
     elif movement == 'Map':
         map()
@@ -1706,4 +1726,7 @@ while direction_chosen:
         print("Patroling goblins found you!")
         input()
         fighting_patrolling_goblins = True
-        encounter(**goblins, amount=random.randint(3,6))
+        action = encounter(**goblins, amount=random.randint(3,6))
+
+
+print("Thank you for playtesting! That is the whole game for now.")
