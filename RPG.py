@@ -167,7 +167,6 @@ def number(asking, parameter=None):
             print("Please enter a valid number!")
 
 
-
 #uses coordinates to find what directions the player can go
 def find_directions():
     possible_directions = [1, 2, 3, 4]
@@ -232,7 +231,6 @@ def find_directions():
         
     return possible_directions
 
-
 #created directions(), inputs will determine what directions are shown
 def directions(*available):
     print(f"You see {len(available)} exits to this room.")
@@ -271,7 +269,6 @@ def death():
     print("Do not have fear! Try again, Ravenport needs you!")
     input("")
     sys.exit("Game over.")
-
 
 #function for a room with gold in it
 def gold_room():
@@ -914,7 +911,6 @@ def map():
         print("+---+---+---+---+---+")
         input()
 
-
 #entrance to the boss room, has a mini puzzle thing
 def entrance_boss():
     if player_data["Level"] >= 2:
@@ -967,7 +963,6 @@ def boss_1():
 }
     encounter(**warden_boss)
     return 3
-
 
 #short descriptor about the staircase, and allows the player to level up
 def staircase():
@@ -1386,6 +1381,7 @@ dungeon_level = 2
 row = 1
 column = 0
 
+
 ##creates a bunch of rooms used on layer 2
 
 def vault_room():
@@ -1589,11 +1585,13 @@ dungeon_2_visited = [
     [False, False, False, False, False],
     [False, False, False, False, False]
 ]
+
 moving_enemy_row = 0
 moving_enemy_direction = 'Down'
 moving_enemy_alive_2 = True
 action = 99
 direction_chosen = True
+#layer 2 movement loop
 while direction_chosen:
 
     possible_directions = find_directions()
